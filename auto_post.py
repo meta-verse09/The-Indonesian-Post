@@ -1,10 +1,9 @@
 import os
-import json
 import random
-from google import genai
+from openai import OpenAI
 
-# Inisialisasi Google GenAI SDK terbaru
-client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+# Inisialisasi OpenAI Client
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 TOPIC_IDEAS = [
     "hidden gem beaches in Lombok and Raja Ampat",
@@ -36,26 +35,29 @@ def generate_article():
     4. HTML Formatting:
        - Use clean HTML tags (<h3>, <p>, <ul>, <li>, <b>, <em>).
        - DO NOT include <html>, <head>, <body>, or ```html markdown tags.
-       - Include 1-2 relevant Unsplash placeholder image tags with clear alt text and caption. Example: 
+       - Include 1-2 relevant image tags using Unsplash source. Example:
          <img src="[https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80](https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80)" alt="Indonesia Nature" style="width:100%; border-radius:8px; margin:15px 0;">
     5. Output Format:
        - FIRST LINE MUST BE THE ARTICLE TITLE (No HTML tags, no quotes, just plain text).
        - ALL SUBSEQUENT LINES MUST BE THE HTML CONTENT.
     """
     
-    # Menggunakan model gemini-2.5-flash
-    response = client.models.generate_content(
-        model='gemini-2.5-flash',
-        contents=prompt,
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "You are a professional travel blogger."},
+            {"role": "user", "content": prompt}
+        ]
     )
     
-    lines = response.text.strip().split('\n')
+    text = response.choices[0].message.content.strip()
+    lines = text.split('\n')
     title = lines[0].replace('#', '').replace('*', '').strip()
     content = '\n'.join(lines[1:])
     return title, content
 
 def main():
-    print("Generating English travel/culinary article for 'The Indonesian Post'...")
+    print("Generating English travel/culinary article for 'The Indonesian Post' using OpenAI...")
     title, content = generate_article()
     print(f"Article Generated Successfully!\nTitle: {title}")
     
