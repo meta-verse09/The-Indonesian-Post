@@ -1,41 +1,61 @@
 import os
 import json
+import random
 import google.generativeai as genai
-from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import build
 
 # Konfigurasi Gemini API
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
+# List topik acak agar variatif (Wisata Alam & Kuliner Indonesia)
+TOPIC_IDEAS = [
+    "hidden gem beaches in Lombok and Raja Ampat",
+    "must-try authentic Indonesian street foods and their history",
+    "breathtaking volcano hiking destinations in Java and Bali",
+    "traditional Indonesian coffee culture and best specialty beans",
+    "exotic islands in East Indonesia for diving and snorkeling",
+    "rich flavors of Sumatran cuisine: Rendang and beyond",
+    "cultural heritage sites and ancient temples in Yogyakarta",
+    "traditional Indonesian desserts and refreshing tropical drinks"
+]
+
 def generate_article():
-    prompt = (
-        "Tuliskan 1 artikel blog yang sangat menarik, informatif, dan ramah SEO "
-        "dalam bahasa Indonesia. Topik bebas seputar berita umum, teknologi, atau gaya hidup. "
-        "Panjang artikel sekitar 800-1000 kata (maksimal 5000 karakter). "
-        "Gunakan format HTML lengkap dengan tag <h3>, <p>, <ul>, <li>, dan <b>. "
-        "Format output: Baris pertama adalah JUDUL ARTIKEL (tanpa tag HTML), "
-        "dan baris berikutnya adalah isi artikel HTML."
-    )
+    selected_topic = random.choice(TOPIC_IDEAS)
+    
+    prompt = f"""
+    You are an expert travel journalist and food writer for 'The Indonesian Post', a blog dedicated to showcasing Indonesia's natural beauty and culinary heritage to international readers.
+
+    Topic angle: Focus on {selected_topic}.
+
+    Requirements:
+    1. Language: Engaging, natural, and descriptive English suitable for foreign tourists and travel enthusiasts.
+    2. Length: Approximately 800 to 1,200 words (structured for easy reading).
+    3. Content Structure:
+       - Engaging introduction highlighting Indonesia's charm.
+       - Detailed sections covering specific destinations or culinary dishes with location context.
+       - Practical tips for travelers (best time to visit, flavor profiles, etiquette, etc.).
+       - Inspiring conclusion.
+    4. HTML Formatting:
+       - Use clean HTML tags (<h3>, <p>, <ul>, <li>, <b>, <em>).
+       - DO NOT include <html>, <head>, <body>, or ```html markdown tags.
+       - Include 1-2 relevant Unsplash placeholder image tags with clear alt text and caption. Example: 
+         <img src="[https://source.unsplash.com/800x450/?indonesia,travel](https://source.unsplash.com/800x450/?indonesia,travel)" alt="Indonesia Nature" style="width:100%; border-radius:8px; margin:15px 0;">
+    5. Output Format:
+       - FIRST LINE MUST BE THE ARTICLE TITLE (No HTML tags, no quotes, just plain text).
+       - ALL SUBSEQUENT LINES MUST BE THE HTML CONTENT.
+    """
     
     model = genai.GenerativeModel('gemini-1.5-flash')
     response = model.generate_content(prompt)
     
     lines = response.text.strip().split('\n')
-    title = lines[0].replace('#', '').strip()
+    title = lines[0].replace('#', '').replace('*', '').strip()
     content = '\n'.join(lines[1:])
     return title, content
 
 def main():
-    print("Mulai membuat artikel dengan Gemini AI...")
+    print("Generating English travel/culinary article for 'The Indonesian Post'...")
     title, content = generate_article()
-    print(f"Artikel berhasil dibuat: {title}")
-
-    # Mengambil kredensial Blogger dari Secrets
-    client_secret_data = json.loads(os.environ["BLOGGER_CLIENT_SECRET"])
-    blog_id = os.environ["BLOG_ID"]
-
-    print("Siap mengirimkan ke Blogger API...")
-    # Proses kirim draf/post ke Blogger v3
+    print(f"Article Generated Successfully:\nTitle: {title}")
     
 if __name__ == "__main__":
     main()
