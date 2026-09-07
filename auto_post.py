@@ -1,12 +1,11 @@
 import os
 import json
 import random
-import google.generativeai as genai
+from google import genai
 
-# Konfigurasi Gemini API
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+# Inisialisasi Google GenAI SDK terbaru
+client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
-# List topik acak agar variatif (Wisata Alam & Kuliner Indonesia)
 TOPIC_IDEAS = [
     "hidden gem beaches in Lombok and Raja Ampat",
     "must-try authentic Indonesian street foods and their history",
@@ -38,14 +37,17 @@ def generate_article():
        - Use clean HTML tags (<h3>, <p>, <ul>, <li>, <b>, <em>).
        - DO NOT include <html>, <head>, <body>, or ```html markdown tags.
        - Include 1-2 relevant Unsplash placeholder image tags with clear alt text and caption. Example: 
-         <img src="[https://source.unsplash.com/800x450/?indonesia,travel](https://source.unsplash.com/800x450/?indonesia,travel)" alt="Indonesia Nature" style="width:100%; border-radius:8px; margin:15px 0;">
+         <img src="[https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80](https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80)" alt="Indonesia Nature" style="width:100%; border-radius:8px; margin:15px 0;">
     5. Output Format:
        - FIRST LINE MUST BE THE ARTICLE TITLE (No HTML tags, no quotes, just plain text).
        - ALL SUBSEQUENT LINES MUST BE THE HTML CONTENT.
     """
     
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    response = model.generate_content(prompt)
+    # Menggunakan model gemini-2.5-flash
+    response = client.models.generate_content(
+        model='gemini-2.5-flash',
+        contents=prompt,
+    )
     
     lines = response.text.strip().split('\n')
     title = lines[0].replace('#', '').replace('*', '').strip()
@@ -55,7 +57,7 @@ def generate_article():
 def main():
     print("Generating English travel/culinary article for 'The Indonesian Post'...")
     title, content = generate_article()
-    print(f"Article Generated Successfully:\nTitle: {title}")
+    print(f"Article Generated Successfully!\nTitle: {title}")
     
 if __name__ == "__main__":
     main()
