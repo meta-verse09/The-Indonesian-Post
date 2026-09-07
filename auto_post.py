@@ -42,7 +42,7 @@ def generate_article():
        - ALL SUBSEQUENT LINES MUST BE THE HTML CONTENT.
     """
     
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-2.5-flash')
     response = model.generate_content(prompt)
     
     lines = response.text.strip().split('\n')
