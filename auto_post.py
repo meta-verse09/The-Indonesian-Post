@@ -1,9 +1,9 @@
 import os
 import random
-from openai import OpenAI
+import google.generativeai as genai
 
-# Inisialisasi OpenAI Client
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+# Inisialisasi Gemini API
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
 TOPIC_IDEAS = [
     "hidden gem beaches in Lombok and Raja Ampat",
@@ -35,29 +35,23 @@ def generate_article():
     4. HTML Formatting:
        - Use clean HTML tags (<h3>, <p>, <ul>, <li>, <b>, <em>).
        - DO NOT include <html>, <head>, <body>, or ```html markdown tags.
-       - Include 1-2 relevant image tags using Unsplash source. Example:
+       - Include 1-2 relevant Unsplash placeholder image tags with clear alt text and caption. Example: 
          <img src="[https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80](https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80)" alt="Indonesia Nature" style="width:100%; border-radius:8px; margin:15px 0;">
     5. Output Format:
        - FIRST LINE MUST BE THE ARTICLE TITLE (No HTML tags, no quotes, just plain text).
        - ALL SUBSEQUENT LINES MUST BE THE HTML CONTENT.
     """
     
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "You are a professional travel blogger."},
-            {"role": "user", "content": prompt}
-        ]
-    )
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    response = model.generate_content(prompt)
     
-    text = response.choices[0].message.content.strip()
-    lines = text.split('\n')
+    lines = response.text.strip().split('\n')
     title = lines[0].replace('#', '').replace('*', '').strip()
     content = '\n'.join(lines[1:])
     return title, content
 
 def main():
-    print("Generating English travel/culinary article for 'The Indonesian Post' using OpenAI...")
+    print("Generating English travel/culinary article for 'The Indonesian Post'...")
     title, content = generate_article()
     print(f"Article Generated Successfully!\nTitle: {title}")
     
